@@ -1,0 +1,1763 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>APLIKASI REKAP NILAI LOMBA PRAMUKA - KWARRAN 02 MASARAN</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome & Phosphor Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.com.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <!-- SheetJS for Exporting to Excel/Spreadsheet -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        pramuka: {
+                            50: '#fdf8f4',
+                            100: '#f6ebe0',
+                            200: '#edd5c1',
+                            300: '#e0b89a',
+                            400: '#cd936f',
+                            500: '#be744d',
+                            600: '#a3573a',
+                            700: '#834130',
+                            800: '#6d362d',
+                            900: '#4a231b',
+                            dark: '#2c1510',
+                            gold: '#df9e2d',
+                            goldlight: '#f7d070',
+                            tan: '#e8d8c8',
+                            scarlet: '#b91c1c'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'Poppins', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Custom Morphing & Glassmorphic CSS Effects */
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f4ece4;
+            color: #2c1510;
+            overflow-x: hidden;
+        }
+
+        /* MORPH Transitions */
+        .morph-element {
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .tab-content {
+            opacity: 0;
+            transform: translateY(12px) scale(0.98);
+            transition: opacity 0.35s ease, transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+            display: none;
+        }
+
+        .tab-content.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            display: block;
+        }
+
+        /* Pramuka Scarf Gradient Backgrounds */
+        .bg-pramuka-pattern {
+            background-color: #3d1c14;
+            background-image: radial-gradient(#be744d 1px, transparent 1px), radial-gradient(#be744d 1px, #2c1510 1px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+        }
+
+        .card-futuristic {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(237, 213, 193, 0.6);
+            box-shadow: 0 10px 30px -5px rgba(74, 35, 27, 0.08), 0 4px 10px -2px rgba(74, 35, 27, 0.04);
+            border-radius: 1.25rem;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .card-futuristic:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 18px 35px -5px rgba(74, 35, 27, 0.12), 0 8px 15px -2px rgba(74, 35, 27, 0.06);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #edd5c1;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #be744d;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a3573a;
+        }
+
+        /* Badge Glow Animations */
+        @keyframes pulseGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(223, 158, 45, 0.4); }
+            50% { box-shadow: 0 0 25px rgba(223, 158, 45, 0.8); }
+        }
+
+        .badge-winner {
+            animation: pulseGlow 2.5s infinite;
+        }
+
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            body {
+                background: white;
+                color: black;
+            }
+            .card-futuristic {
+                box-shadow: none;
+                border: 1px solid #ccc;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased">
+
+    <div id="toast-container" class="fixed top-5 right-5 z-50 flex flex-col gap-3 pointer-events-none"></div>
+
+    <div id="login-page" class="fixed inset-0 z-40 bg-pramuka-pattern flex items-center justify-center p-4 overflow-y-auto morph-element">
+        <div class="max-w-4xl w-full my-auto">
+            
+            <!-- Login Header -->
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-pramuka-gold to-yellow-600 rounded-2xl shadow-xl mb-4 border-2 border-amber-200/50 transform hover:rotate-6 transition-transform">
+                    <i class="fa-solid fa-compass-drafting text-4xl text-pramuka-dark"></i>
+                </div>
+                <h1 class="text-2xl md:text-3xl font-extrabold text-white tracking-wide uppercase drop-shadow-md">
+                    APLIKASI REKAP NILAI LOMBA PRAMUKA JENJANG SMP
+                </h1>
+                <p class="text-pramuka-tan text-sm md:text-base mt-2 font-medium">
+                    KWARRAN 02 MASARAN - KABUPATEN SRAGEN
+                </p>
+            </div>
+
+            <!-- Two Column Login Container -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 bg-pramuka-100/95 backdrop-blur-md p-6 md:p-8 rounded-3xl border border-pramuka-300 shadow-2xl">
+                
+                <!-- Column 1: Admin Kwarran Login -->
+                <div class="bg-white/90 p-6 rounded-2xl border-2 border-pramuka-500/20 shadow-sm flex flex-col justify-between hover:border-pramuka-500 transition-all">
+                    <div>
+                        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-pramuka-200">
+                            <div class="p-2.5 bg-pramuka-700 text-white rounded-xl shadow-md">
+                                <i class="fa-solid fa-user-shield text-lg"></i>
+                            </div>
+                            <div>
+                                <h2 class="font-bold text-pramuka-900 text-lg">Login Admin / Pembina</h2>
+                                <p class="text-xs text-gray-500">Akses Penuh Fitur (Input, Edit & Hapus)</p>
+                            </div>
+                        </div>
+
+                        <form id="admin-login-form" onsubmit="handleAdminLogin(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-pramuka-900 uppercase tracking-wider mb-1.5">Nama Kwarran</label>
+                                <div class="relative">
+                                    <i class="fa-solid fa-landmark absolute left-3.5 top-1/2 -translate-y-1/2 text-pramuka-600"></i>
+                                    <input type="text" id="admin-kwarran" required 
+                                        class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-pramuka-300 focus:outline-none focus:ring-2 focus:ring-pramuka-600 bg-pramuka-50 text-sm font-semibold text-pramuka-900"
+                                        placeholder="Contoh: KWARRAN MASARAN">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-pramuka-900 uppercase tracking-wider mb-1.5">Password Admin</label>
+                                <div class="relative">
+                                    <i class="fa-solid fa-lock absolute left-3.5 top-1/2 -translate-y-1/2 text-pramuka-600"></i>
+                                    <input type="password" id="admin-password" required
+                                        class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-pramuka-300 focus:outline-none focus:ring-2 focus:ring-pramuka-600 bg-pramuka-50 text-sm font-semibold text-pramuka-900"
+                                        placeholder="••••••••">
+                                </div>
+                            </div>
+
+                            <button type="submit" 
+                                class="w-full mt-2 py-3 bg-gradient-to-r from-pramuka-700 to-pramuka-900 hover:from-pramuka-800 hover:to-pramuka-dark text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform active:scale-95 transition-all flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-right-to-bracket"></i>
+                                <span>Masuk Sebagai Admin</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Column 2: Guest / Gudep Login -->
+                <div class="bg-white/90 p-6 rounded-2xl border-2 border-pramuka-300 shadow-sm flex flex-col justify-between hover:border-pramuka-400 transition-all">
+                    <div>
+                        <div class="flex items-center gap-3 mb-4 pb-3 border-b border-pramuka-200">
+                            <div class="p-2.5 bg-pramuka-gold text-pramuka-dark rounded-xl shadow-md">
+                                <i class="fa-solid fa-users text-lg"></i>
+                            </div>
+                            <div>
+                                <h2 class="font-bold text-pramuka-900 text-lg">Akses GUDEP / Umum</h2>
+                                <p class="text-xs text-gray-500">Mode Lihat Rekap (Read-Only)</p>
+                            </div>
+                        </div>
+
+                        <form id="gudep-login-form" onsubmit="handleGudepLogin(event)" class="space-y-4">
+                            <div>
+                                <label class="block text-xs font-bold text-pramuka-900 uppercase tracking-wider mb-1.5">Pilih / Nama Gudep</label>
+                                <div class="relative">
+                                    <i class="fa-solid fa-school absolute left-3.5 top-1/2 -translate-y-1/2 text-pramuka-600"></i>
+                                    <input type="password" id="gudep-access-key" required 
+                                        class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-pramuka-300 focus:outline-none focus:ring-2 focus:ring-pramuka-500 bg-pramuka-50 text-sm font-semibold text-pramuka-900"
+                                        placeholder="Akses Gudep / Pengunjung">
+                                </div>
+                                <p class="text-[11px] text-gray-500 mt-1.5 italic">Isi nama Gudep Anda untuk dapat melihat nilai & peringkat.</p>
+                            </div>
+
+                            <button type="submit" 
+                                class="w-full mt-6 py-3 bg-gradient-to-r from-amber-600 to-pramuka-600 hover:from-amber-700 hover:to-pramuka-700 text-white font-bold rounded-xl shadow-lg hover:shadow-xl transform active:scale-95 transition-all flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-eye"></i>
+                                <span>Masuk Mode Lihat (Gudep)</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Footer Developer Credit -->
+            <div class="text-center mt-6">
+                <p class="text-xs md:text-sm text-pramuka-tan/90 font-medium tracking-wide bg-pramuka-dark/60 py-2 px-4 rounded-full inline-block backdrop-blur-sm border border-pramuka-500/30">
+                    <i class="fa-solid fa-code text-pramuka-gold mr-1.5"></i>
+                    Aplikasi ini dikembangkan oleh <span class="font-bold text-white">Hendra Budiarsa, S.Pd</span>
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+    <div id="main-app" class="hidden min-h-screen flex flex-col bg-pramuka-50">
+        
+        <!-- Top Navigation Header -->
+        <header class="bg-gradient-to-r from-pramuka-dark via-pramuka-900 to-pramuka-800 text-white shadow-xl sticky top-0 z-30 border-b border-pramuka-700">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    
+                    <!-- Left: Logo & Title -->
+                    <div class="flex items-center gap-3">
+                        <button onclick="toggleSidebar()" class="md:hidden text-pramuka-tan hover:text-white p-2 rounded-lg">
+                            <i class="fa-solid fa-bars text-xl"></i>
+                        </button>
+                        <div class="w-10 h-10 bg-pramuka-gold rounded-xl flex items-center justify-center shadow-md">
+                            <i class="fa-solid fa-award text-pramuka-dark text-xl"></i>
+                        </div>
+                        <div>
+                            <h1 class="font-extrabold text-base md:text-lg tracking-wide text-white leading-tight">
+                                REKAP LOMBA PRAMUKA
+                            </h1>
+                            <p class="text-[11px] text-pramuka-tan flex items-center gap-1 font-semibold">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
+                                KWARRAN 02 MASARAN
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Center Navigation Tabs (Desktop) -->
+                    <nav class="hidden md:flex items-center space-x-1">
+                        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-tab px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 text-pramuka-tan hover:text-white hover:bg-white/10">
+                            <i class="fa-solid fa-gauge-high"></i> Dashboard
+                        </button>
+                        <button onclick="switchTab('peserta')" id="nav-peserta" class="nav-tab px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 text-pramuka-tan hover:text-white hover:bg-white/10">
+                            <i class="fa-solid fa-users"></i> Data Peserta
+                        </button>
+                        <button onclick="switchTab('lomba-pioneering')" id="nav-lomba-pioneering" class="nav-tab px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 text-pramuka-tan hover:text-white hover:bg-white/10">
+                            <i class="fa-solid fa-campground"></i> <span class="comp-name-pioneering">Pioneering</span>
+                        </button>
+                        <button onclick="switchTab('lomba-hastakarya')" id="nav-lomba-hastakarya" class="nav-tab px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 text-pramuka-tan hover:text-white hover:bg-white/10">
+                            <i class="fa-solid fa-scissors"></i> <span class="comp-name-hastakarya">Hasta Karya</span>
+                        </button>
+                        <button onclick="switchTab('lomba-ansamble')" id="nav-lomba-ansamble" class="nav-tab px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 text-pramuka-tan hover:text-white hover:bg-white/10">
+                            <i class="fa-solid fa-music"></i> <span class="comp-name-ansamble">Ansamble Tradisional</span>
+                        </button>
+                        <button onclick="switchTab('peringkat-umum')" id="nav-peringkat-umum" class="nav-tab px-3.5 py-2 rounded-xl text-xs font-bold transition-all flex items-center gap-2 text-pramuka-tan hover:text-white hover:bg-white/10">
+                            <i class="fa-solid fa-trophy"></i> Peringkat Umum
+                        </button>
+                    </nav>
+
+                    <!-- Right User Badge & Logout -->
+                    <div class="flex items-center gap-3">
+                        <div id="user-role-badge" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold bg-pramuka-gold/20 text-pramuka-goldlight border border-pramuka-gold/40">
+                            <i class="fa-solid fa-user-shield"></i>
+                            <span id="role-text">Admin</span>
+                        </div>
+                        <button onclick="logout()" title="Keluar" 
+                            class="p-2 rounded-xl bg-red-600/80 hover:bg-red-600 text-white transition-all transform active:scale-95 shadow-md">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </header>
+
+        <!-- Sidebar for Mobile Overlay -->
+        <div id="mobile-sidebar" class="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm hidden md:hidden transition-opacity" onclick="toggleSidebar()">
+            <div class="w-64 bg-pramuka-dark h-full shadow-2xl p-5 flex flex-col justify-between" onclick="event.stopPropagation()">
+                <div>
+                    <div class="flex items-center justify-between pb-4 border-b border-pramuka-700 mb-4">
+                        <div class="font-extrabold text-white text-base flex items-center gap-2">
+                            <i class="fa-solid fa-compass text-pramuka-gold"></i> Navigasi Menu
+                        </div>
+                        <button onclick="toggleSidebar()" class="text-pramuka-tan hover:text-white">
+                            <i class="fa-solid fa-xmark text-xl"></i>
+                        </button>
+                    </div>
+                    <div class="space-y-1.5">
+                        <button onclick="switchTab('dashboard'); toggleSidebar()" class="w-full text-left px-4 py-3 rounded-xl text-xs font-bold text-pramuka-tan hover:bg-pramuka-800 hover:text-white flex items-center gap-3">
+                            <i class="fa-solid fa-gauge-high text-pramuka-gold"></i> Dashboard
+                        </button>
+                        <button onclick="switchTab('peserta'); toggleSidebar()" class="w-full text-left px-4 py-3 rounded-xl text-xs font-bold text-pramuka-tan hover:bg-pramuka-800 hover:text-white flex items-center gap-3">
+                            <i class="fa-solid fa-users text-sky-400"></i> Data Peserta
+                        </button>
+                        <button onclick="switchTab('lomba-pioneering'); toggleSidebar()" class="w-full text-left px-4 py-3 rounded-xl text-xs font-bold text-pramuka-tan hover:bg-pramuka-800 hover:text-white flex items-center gap-3">
+                            <i class="fa-solid fa-campground text-amber-400"></i> <span class="comp-name-pioneering">Pioneering</span>
+                        </button>
+                        <button onclick="switchTab('lomba-hastakarya'); toggleSidebar()" class="w-full text-left px-4 py-3 rounded-xl text-xs font-bold text-pramuka-tan hover:bg-pramuka-800 hover:text-white flex items-center gap-3">
+                            <i class="fa-solid fa-scissors text-emerald-400"></i> <span class="comp-name-hastakarya">Hasta Karya</span>
+                        </button>
+                        <button onclick="switchTab('lomba-ansamble'); toggleSidebar()" class="w-full text-left px-4 py-3 rounded-xl text-xs font-bold text-pramuka-tan hover:bg-pramuka-800 hover:text-white flex items-center gap-3">
+                            <i class="fa-solid fa-music text-purple-400"></i> <span class="comp-name-ansamble">Ansamble Tradisional</span>
+                        </button>
+                        <button onclick="switchTab('peringkat-umum'); toggleSidebar()" class="w-full text-left px-4 py-3 rounded-xl text-xs font-bold text-pramuka-tan hover:bg-pramuka-800 hover:text-white flex items-center gap-3">
+                            <i class="fa-solid fa-trophy text-amber-300"></i> Peringkat Umum
+                        </button>
+                    </div>
+                </div>
+                <div class="pt-4 border-t border-pramuka-800 text-[11px] text-pramuka-tan text-center">
+                    KWARRAN MASARAN SMP
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content View Area -->
+        <main class="flex-grow max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+
+            <div id="tab-dashboard" class="tab-content active space-y-6">
+                
+                <!-- Dashboard Welcome Banner -->
+                <div class="relative overflow-hidden rounded-3xl bg-gradient-to-r from-pramuka-900 via-pramuka-800 to-pramuka-700 text-white p-6 md:p-8 shadow-xl border border-pramuka-600">
+                    <div class="absolute right-0 top-0 bottom-0 opacity-10 flex items-center pointer-events-none pr-8">
+                        <i class="fa-solid fa-campground text-[200px]"></i>
+                    </div>
+                    <div class="relative z-10 max-w-2xl">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-pramuka-gold text-pramuka-dark uppercase tracking-wider shadow-sm">
+                            Kwarran 02 Masaran
+                        </span>
+                        <h2 class="text-2xl md:text-3xl font-extrabold mt-3 tracking-tight">
+                            Selamat Datang di Portal Rekap Nilai Lomba Pramuka SMP
+                        </h2>
+                        <p class="text-pramuka-tan text-xs md:text-sm mt-2 leading-relaxed">
+                            Sistem rekapitulasi nilai digital terpadu untuk pengolahan skor, pemeringkatan otomatis kategori Putra, Putri, Kelompok, serta Penentuan Juara Umum.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Colourful Informative Quick Stats Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    
+                    <div class="card-futuristic p-5 bg-gradient-to-br from-blue-600/10 via-white to-blue-50/50 border-blue-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-bold text-blue-900 uppercase tracking-wider">Total Peserta</p>
+                                <h3 id="dash-stat-peserta" class="text-3xl font-black text-blue-950 mt-1">0</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-2xl bg-blue-600 text-white flex items-center justify-center shadow-lg shadow-blue-500/30">
+                                <i class="fa-solid fa-user-group text-xl"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-blue-100 flex justify-between text-xs font-semibold text-blue-800">
+                            <span><i class="fa-solid fa-mars text-blue-600"></i> Pa: <strong id="dash-stat-putra">0</strong></span>
+                            <span><i class="fa-solid fa-venus text-pink-600"></i> Pi: <strong id="dash-stat-putri">0</strong></span>
+                        </div>
+                    </div>
+
+                    <div class="card-futuristic p-5 bg-gradient-to-br from-amber-600/10 via-white to-amber-50/50 border-amber-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-bold text-amber-900 uppercase tracking-wider">Total Gudep</p>
+                                <h3 id="dash-stat-gudep" class="text-3xl font-black text-amber-950 mt-1">0</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-2xl bg-amber-500 text-white flex items-center justify-center shadow-lg shadow-amber-500/30">
+                                <i class="fa-solid fa-school text-xl"></i>
+                            </div>
+                        </div>
+                        <p class="mt-4 pt-3 border-t border-amber-100 text-xs text-amber-800 font-medium">
+                            SMP / MTs se-Kwarran Masaran
+                        </p>
+                    </div>
+
+                    <div class="card-futuristic p-5 bg-gradient-to-br from-emerald-600/10 via-white to-emerald-50/50 border-emerald-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-bold text-emerald-900 uppercase tracking-wider">Mata Lomba</p>
+                                <h3 class="text-3xl font-black text-emerald-950 mt-1">3</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                                <i class="fa-solid fa-cubes text-xl"></i>
+                            </div>
+                        </div>
+                        <p class="mt-4 pt-3 border-t border-emerald-100 text-xs text-emerald-800 font-medium truncate">
+                            Pioneering, Hasta Karya, Ansamble
+                        </p>
+                    </div>
+
+                    <div class="card-futuristic p-5 bg-gradient-to-br from-purple-600/10 via-white to-purple-50/50 border-purple-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-xs font-bold text-purple-900 uppercase tracking-wider">Status Rekap</p>
+                                <h3 id="dash-stat-status" class="text-lg font-bold text-purple-950 mt-1">Aktif</h3>
+                            </div>
+                            <div class="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center shadow-lg shadow-purple-500/30">
+                                <i class="fa-solid fa-chart-line text-xl"></i>
+                            </div>
+                        </div>
+                        <p class="mt-4 pt-3 border-t border-purple-100 text-xs text-purple-800 font-medium">
+                            Kalkulasi Otomatis Realtime
+                        </p>
+                    </div>
+
+                </div>
+
+                <!-- Quick Menu Access Grid & Competition Names Management -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <!-- Quick Shortcuts -->
+                    <div class="lg:col-span-2 card-futuristic p-6">
+                        <div class="flex items-center justify-between mb-5">
+                            <h3 class="font-bold text-pramuka-900 text-base flex items-center gap-2">
+                                <i class="fa-solid fa-bolt text-pramuka-gold"></i> Akses Cepat Menu Aplikasi
+                            </h3>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                            
+                            <button onclick="switchTab('peserta')" class="p-4 rounded-2xl bg-pramuka-100/60 hover:bg-pramuka-200 border border-pramuka-300 text-left transition-all hover:scale-105 group">
+                                <div class="w-10 h-10 rounded-xl bg-sky-500 text-white flex items-center justify-center shadow-md mb-3 group-hover:rotate-6 transition-transform">
+                                    <i class="fa-solid fa-user-plus"></i>
+                                </div>
+                                <div class="font-bold text-xs text-pramuka-900">Kelola Peserta</div>
+                                <div class="text-[11px] text-gray-500">Input / Edit Gudep</div>
+                            </button>
+
+                            <button onclick="switchTab('lomba-pioneering')" class="p-4 rounded-2xl bg-pramuka-100/60 hover:bg-pramuka-200 border border-pramuka-300 text-left transition-all hover:scale-105 group">
+                                <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shadow-md mb-3 group-hover:rotate-6 transition-transform">
+                                    <i class="fa-solid fa-campground"></i>
+                                </div>
+                                <div class="font-bold text-xs text-pramuka-900 comp-name-pioneering">Pioneering</div>
+                                <div class="text-[11px] text-gray-500">Nilai & Rank Pa/Pi</div>
+                            </button>
+
+                            <button onclick="switchTab('lomba-hastakarya')" class="p-4 rounded-2xl bg-pramuka-100/60 hover:bg-pramuka-200 border border-pramuka-300 text-left transition-all hover:scale-105 group">
+                                <div class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center shadow-md mb-3 group-hover:rotate-6 transition-transform">
+                                    <i class="fa-solid fa-scissors"></i>
+                                </div>
+                                <div class="font-bold text-xs text-pramuka-900 comp-name-hastakarya">Hasta Karya</div>
+                                <div class="text-[11px] text-gray-500">Nilai & Rank Pa/Pi</div>
+                            </button>
+
+                            <button onclick="switchTab('lomba-ansamble')" class="p-4 rounded-2xl bg-pramuka-100/60 hover:bg-pramuka-200 border border-pramuka-300 text-left transition-all hover:scale-105 group">
+                                <div class="w-10 h-10 rounded-xl bg-purple-500 text-white flex items-center justify-center shadow-md mb-3 group-hover:rotate-6 transition-transform">
+                                    <i class="fa-solid fa-music"></i>
+                                </div>
+                                <div class="font-bold text-xs text-pramuka-900 comp-name-ansamble">Ansamble</div>
+                                <div class="text-[11px] text-gray-500">Nilai Kelompok</div>
+                            </button>
+
+                            <button onclick="switchTab('peringkat-umum')" class="p-4 rounded-2xl bg-gradient-to-br from-pramuka-gold/20 to-amber-100 hover:from-pramuka-gold/30 border border-pramuka-gold/50 text-left transition-all hover:scale-105 group col-span-2 sm:col-span-2">
+                                <div class="w-10 h-10 rounded-xl bg-pramuka-gold text-pramuka-dark flex items-center justify-center shadow-md mb-3 group-hover:rotate-6 transition-transform">
+                                    <i class="fa-solid fa-trophy"></i>
+                                </div>
+                                <div class="font-bold text-xs text-pramuka-900">Peringkat Umum (Juara 1, 2, 3 & Harapan 1)</div>
+                                <div class="text-[11px] text-pramuka-800">Rekap rincian & Ekspor Spreadsheet</div>
+                            </button>
+
+                        </div>
+                    </div>
+
+                    <!-- Customize Competition Names Card (Admin Only feature) -->
+                    <div class="card-futuristic p-6 bg-white/90">
+                        <div class="flex items-center justify-between mb-4 pb-2 border-b border-pramuka-200">
+                            <h3 class="font-bold text-pramuka-900 text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-pen-to-square text-pramuka-600"></i> Edit Nama Lomba
+                            </h3>
+                            <span class="text-[10px] bg-pramuka-200 text-pramuka-900 px-2 py-0.5 rounded-full font-bold">Kustomisasi</span>
+                        </div>
+                        <form id="comp-names-form" onsubmit="saveCompetitionNames(event)" class="space-y-3">
+                            <div>
+                                <label class="block text-[11px] font-bold text-gray-600 mb-1">Nama Lomba 1</label>
+                                <input type="text" id="edit-comp-1" required class="w-full px-3 py-2 rounded-xl border border-pramuka-300 text-xs font-semibold text-pramuka-900 focus:ring-2 focus:ring-pramuka-600">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-gray-600 mb-1">Nama Lomba 2</label>
+                                <input type="text" id="edit-comp-2" required class="w-full px-3 py-2 rounded-xl border border-pramuka-300 text-xs font-semibold text-pramuka-900 focus:ring-2 focus:ring-pramuka-600">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-bold text-gray-600 mb-1">Nama Lomba 3</label>
+                                <input type="text" id="edit-comp-3" required class="w-full px-3 py-2 rounded-xl border border-pramuka-300 text-xs font-semibold text-pramuka-900 focus:ring-2 focus:ring-pramuka-600">
+                            </div>
+                            <button type="submit" class="admin-only w-full py-2 bg-pramuka-800 hover:bg-pramuka-900 text-white font-bold rounded-xl text-xs shadow transition-all flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-floppy-disk"></i> Simpan Nama Lomba
+                            </button>
+                        </form>
+                    </div>
+
+                </div>
+
+                <!-- Leaderboard Overview Teaser -->
+                <div class="card-futuristic p-6">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                        <div>
+                            <h3 class="font-bold text-pramuka-900 text-base flex items-center gap-2">
+                                <i class="fa-solid fa-crown text-pramuka-gold text-lg"></i> Preview Juara Umum Sementara
+                            </h3>
+                            <p class="text-xs text-gray-500">Berdasarkan total akumulasi nilai seluruh mata lomba</p>
+                        </div>
+                        <button onclick="switchTab('peringkat-umum')" class="text-xs font-bold text-pramuka-700 hover:text-pramuka-900 flex items-center gap-1">
+                            Lihat Rincian Lengkap <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                    <div id="dash-leaderboard-preview" class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <!-- Dynamic Leaderboard Cards JS -->
+                    </div>
+                </div>
+
+            </div>
+
+            <div id="tab-peserta" class="tab-content space-y-6">
+                
+                <!-- Section Header & Navigation Back -->
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 card-futuristic p-5">
+                    <div>
+                        <h2 class="text-xl font-extrabold text-pramuka-900 flex items-center gap-2">
+                            <i class="fa-solid fa-users text-pramuka-600"></i> Kelola Data Peserta Pramuka
+                        </h2>
+                        <p class="text-xs text-gray-500 mt-0.5">Input nomor peserta, nama GUDEP, dan jenis kelamin (Putra / Putri)</p>
+                    </div>
+                    <button onclick="switchTab('dashboard')" class="px-4 py-2 bg-pramuka-200 hover:bg-pramuka-300 text-pramuka-900 font-bold rounded-xl text-xs transition-all flex items-center gap-2 self-start sm:self-auto">
+                        <i class="fa-solid fa-house"></i> Kembali ke Dashboard
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <!-- Input / Edit Form Card -->
+                    <div class="card-futuristic p-6 h-fit">
+                        <div class="flex items-center justify-between mb-4 pb-3 border-b border-pramuka-200">
+                            <h3 id="peserta-form-title" class="font-bold text-pramuka-900 text-sm flex items-center gap-2">
+                                <i class="fa-solid fa-user-plus text-pramuka-600"></i> Tambah Data Peserta
+                            </h3>
+                            <span class="text-[10px] font-bold px-2.5 py-0.5 bg-pramuka-100 text-pramuka-800 rounded-full">3 Data Cukup</span>
+                        </div>
+
+                        <form id="peserta-form" onsubmit="savePeserta(event)" class="space-y-4">
+                            <input type="hidden" id="peserta-edit-id">
+
+                            <div>
+                                <label class="block text-xs font-bold text-pramuka-900 uppercase tracking-wider mb-1">1. Nomor Peserta</label>
+                                <input type="number" id="peserta-nomor" required min="1" max="999"
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-pramuka-300 text-sm font-semibold text-pramuka-900 focus:ring-2 focus:ring-pramuka-600 focus:outline-none"
+                                    placeholder="Contoh: 01">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-pramuka-900 uppercase tracking-wider mb-1">2. Nama GUDEP</label>
+                                <input type="text" id="peserta-gudep" required 
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-pramuka-300 text-sm font-semibold text-pramuka-900 focus:ring-2 focus:ring-pramuka-600 focus:outline-none"
+                                    placeholder="Contoh: SMP Negeri 1 Masaran">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-pramuka-900 uppercase tracking-wider mb-1">3. Jenis Kelamin</label>
+                                <select id="peserta-jk" required 
+                                    class="w-full px-3.5 py-2.5 rounded-xl border border-pramuka-300 text-sm font-semibold text-pramuka-900 focus:ring-2 focus:ring-pramuka-600 focus:outline-none">
+                                    <option value="">-- Pilih Jenis Kelamin --</option>
+                                    <option value="Putra">Putra (Pa)</option>
+                                    <option value="Putri">Putri (Pi)</option>
+                                </select>
+                            </div>
+
+                            <div class="pt-2 flex gap-2">
+                                <button type="submit" class="admin-only flex-1 py-3 bg-pramuka-800 hover:bg-pramuka-900 text-white font-bold rounded-xl text-xs shadow-md transition-all flex items-center justify-center gap-2">
+                                    <i class="fa-solid fa-floppy-disk"></i> <span id="peserta-btn-text">Simpan Data Peserta</span>
+                                </button>
+                                <button type="button" id="peserta-btn-cancel" onclick="resetPesertaForm()" class="hidden px-3 py-3 bg-gray-200 hover:bg-gray-300 text-gray-700 font-bold rounded-xl text-xs transition-all">
+                                    Batal
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Registered Participants List Table -->
+                    <div class="lg:col-span-2 card-futuristic p-6">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-pramuka-200">
+                            <div>
+                                <h3 class="font-bold text-pramuka-900 text-base flex items-center gap-2">
+                                    <i class="fa-solid fa-list-ol text-pramuka-600"></i> Daftar Peserta Terdaftar
+                                </h3>
+                                <p class="text-xs text-gray-500">Diurutkan secara otomatis berdasarkan nomor peserta</p>
+                            </div>
+                            <div class="relative max-w-xs w-full">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs"></i>
+                                <input type="text" id="search-peserta" oninput="renderPesertaTable()" placeholder="Cari nama gudep / nomor..." class="w-full pl-8 pr-3 py-1.5 rounded-xl border border-pramuka-300 text-xs font-medium focus:ring-2 focus:ring-pramuka-600">
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto rounded-xl border border-pramuka-200">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-pramuka-800 text-white text-xs uppercase tracking-wider">
+                                        <th class="p-3 text-center">No. Urut</th>
+                                        <th class="p-3">Nama GUDEP</th>
+                                        <th class="p-3 text-center">Jenis Kelamin</th>
+                                        <th class="p-3 text-center admin-only">Aksi</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="peserta-table-body" class="divide-y divide-pramuka-100 text-xs font-medium text-pramuka-900 bg-white">
+                                    <!-- Dynamic Rows JS -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div id="tab-lomba-pioneering" class="tab-content space-y-6">
+                
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 card-futuristic p-5">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="p-2 bg-amber-500 text-white rounded-lg text-xs font-bold">Lomba 1</span>
+                            <h2 class="text-xl font-extrabold text-pramuka-900 comp-name-pioneering">Pioneering</h2>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">4 Kriteria Nilai: Simpul & Ikatan, Kekuatan, Kerapian, Kreatifitas (Rekap Terpisah Putra & Putri)</p>
+                    </div>
+                    <button onclick="switchTab('dashboard')" class="px-4 py-2 bg-pramuka-200 hover:bg-pramuka-300 text-pramuka-900 font-bold rounded-xl text-xs transition-all flex items-center gap-2 self-start sm:self-auto">
+                        <i class="fa-solid fa-house"></i> Dashboard
+                    </button>
+                </div>
+
+                <!-- Sub Score Input & Recap Tabs for Pa / Pi -->
+                <div class="grid grid-cols-1 gap-6">
+                    
+                    <!-- Putra Scoring Table -->
+                    <div class="card-futuristic p-6 bg-blue-50/30 border-blue-200">
+                        <div class="flex items-center justify-between mb-4 pb-2 border-b border-blue-200">
+                            <h3 class="font-extrabold text-blue-950 text-base flex items-center gap-2">
+                                <i class="fa-solid fa-mars text-blue-600"></i> Rekap Penilaian - Kategori PUTRA (Pioneering)
+                            </h3>
+                            <button onclick="savePioneeringScores('Putra')" class="admin-only px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white font-bold rounded-xl text-xs shadow flex items-center gap-1.5 transition-all">
+                                <i class="fa-solid fa-floppy-disk"></i> Simpan Data Nilai Putra
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto rounded-xl border border-blue-200 bg-white">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-blue-900 text-white text-[11px] uppercase tracking-wider">
+                                        <th class="p-3 text-center">No</th>
+                                        <th class="p-3">Nama GUDEP</th>
+                                        <th class="p-3 text-center w-24">Simpul & Ikatan</th>
+                                        <th class="p-3 text-center w-24">Kekuatan</th>
+                                        <th class="p-3 text-center w-24">Kerapian</th>
+                                        <th class="p-3 text-center w-24">Kreatifitas</th>
+                                        <th class="p-3 text-center font-extrabold bg-blue-950">Total Skor</th>
+                                        <th class="p-3 text-center font-extrabold bg-blue-950">Peringkat</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pioneering-putra-tbody" class="divide-y divide-blue-100 text-xs font-semibold text-gray-800">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Putri Scoring Table -->
+                    <div class="card-futuristic p-6 bg-rose-50/30 border-rose-200">
+                        <div class="flex items-center justify-between mb-4 pb-2 border-b border-rose-200">
+                            <h3 class="font-extrabold text-rose-950 text-base flex items-center gap-2">
+                                <i class="fa-solid fa-venus text-rose-600"></i> Rekap Penilaian - Kategori PUTRI (Pioneering)
+                            </h3>
+                            <button onclick="savePioneeringScores('Putri')" class="admin-only px-4 py-2 bg-rose-700 hover:bg-rose-800 text-white font-bold rounded-xl text-xs shadow flex items-center gap-1.5 transition-all">
+                                <i class="fa-solid fa-floppy-disk"></i> Simpan Data Nilai Putri
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto rounded-xl border border-rose-200 bg-white">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-rose-900 text-white text-[11px] uppercase tracking-wider">
+                                        <th class="p-3 text-center">No</th>
+                                        <th class="p-3">Nama GUDEP</th>
+                                        <th class="p-3 text-center w-24">Simpul & Ikatan</th>
+                                        <th class="p-3 text-center w-24">Kekuatan</th>
+                                        <th class="p-3 text-center w-24">Kerapian</th>
+                                        <th class="p-3 text-center w-24">Kreatifitas</th>
+                                        <th class="p-3 text-center font-extrabold bg-rose-950">Total Skor</th>
+                                        <th class="p-3 text-center font-extrabold bg-rose-950">Peringkat</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pioneering-putri-tbody" class="divide-y divide-rose-100 text-xs font-semibold text-gray-800">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div id="tab-lomba-hastakarya" class="tab-content space-y-6">
+                
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 card-futuristic p-5">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="p-2 bg-emerald-600 text-white rounded-lg text-xs font-bold">Lomba 2</span>
+                            <h2 class="text-xl font-extrabold text-pramuka-900 comp-name-hastakarya">Hasta Karya</h2>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">3 Kriteria Nilai: Kesesuaian, Keindahan, Kreatifitas (Rekap Terpisah Putra & Putri)</p>
+                    </div>
+                    <button onclick="switchTab('dashboard')" class="px-4 py-2 bg-pramuka-200 hover:bg-pramuka-300 text-pramuka-900 font-bold rounded-xl text-xs transition-all flex items-center gap-2 self-start sm:self-auto">
+                        <i class="fa-solid fa-house"></i> Dashboard
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 gap-6">
+                    
+                    <!-- Putra Scoring Table -->
+                    <div class="card-futuristic p-6 bg-blue-50/30 border-blue-200">
+                        <div class="flex items-center justify-between mb-4 pb-2 border-b border-blue-200">
+                            <h3 class="font-extrabold text-blue-950 text-base flex items-center gap-2">
+                                <i class="fa-solid fa-mars text-blue-600"></i> Rekap Penilaian - Kategori PUTRA (Hasta Karya)
+                            </h3>
+                            <button onclick="saveHastaKaryaScores('Putra')" class="admin-only px-4 py-2 bg-blue-700 hover:bg-blue-800 text-white font-bold rounded-xl text-xs shadow flex items-center gap-1.5 transition-all">
+                                <i class="fa-solid fa-floppy-disk"></i> Simpan Data Nilai Putra
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto rounded-xl border border-blue-200 bg-white">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-blue-900 text-white text-[11px] uppercase tracking-wider">
+                                        <th class="p-3 text-center">No</th>
+                                        <th class="p-3">Nama GUDEP</th>
+                                        <th class="p-3 text-center w-28">Kesesuaian</th>
+                                        <th class="p-3 text-center w-28">Keindahan</th>
+                                        <th class="p-3 text-center w-28">Kreatifitas</th>
+                                        <th class="p-3 text-center font-extrabold bg-blue-950">Total Skor</th>
+                                        <th class="p-3 text-center font-extrabold bg-blue-950">Peringkat</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="hastakarya-putra-tbody" class="divide-y divide-blue-100 text-xs font-semibold text-gray-800">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Putri Scoring Table -->
+                    <div class="card-futuristic p-6 bg-rose-50/30 border-rose-200">
+                        <div class="flex items-center justify-between mb-4 pb-2 border-b border-rose-200">
+                            <h3 class="font-extrabold text-rose-950 text-base flex items-center gap-2">
+                                <i class="fa-solid fa-venus text-rose-600"></i> Rekap Penilaian - Kategori PUTRI (Hasta Karya)
+                            </h3>
+                            <button onclick="saveHastaKaryaScores('Putri')" class="admin-only px-4 py-2 bg-rose-700 hover:bg-rose-800 text-white font-bold rounded-xl text-xs shadow flex items-center gap-1.5 transition-all">
+                                <i class="fa-solid fa-floppy-disk"></i> Simpan Data Nilai Putri
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto rounded-xl border border-rose-200 bg-white">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-rose-900 text-white text-[11px] uppercase tracking-wider">
+                                        <th class="p-3 text-center">No</th>
+                                        <th class="p-3">Nama GUDEP</th>
+                                        <th class="p-3 text-center w-28">Kesesuaian</th>
+                                        <th class="p-3 text-center w-28">Keindahan</th>
+                                        <th class="p-3 text-center w-28">Kreatifitas</th>
+                                        <th class="p-3 text-center font-extrabold bg-rose-950">Total Skor</th>
+                                        <th class="p-3 text-center font-extrabold bg-rose-950">Peringkat</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="hastakarya-putri-tbody" class="divide-y divide-rose-100 text-xs font-semibold text-gray-800">
+                                    <!-- Dynamic rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+
+            <div id="tab-lomba-ansamble" class="tab-content space-y-6">
+                
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 card-futuristic p-5">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="p-2 bg-purple-600 text-white rounded-lg text-xs font-bold">Lomba 3</span>
+                            <h2 class="text-xl font-extrabold text-pramuka-900 comp-name-ansamble">Ansamble Tradisional</h2>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">4 Kriteria Nilai: Kesesuaian Tema, Aransemen Musik, Kualitas Vokal, Kostum (Penilaian Secara KELOMPOK)</p>
+                    </div>
+                    <button onclick="switchTab('dashboard')" class="px-4 py-2 bg-pramuka-200 hover:bg-pramuka-300 text-pramuka-900 font-bold rounded-xl text-xs transition-all flex items-center gap-2 self-start sm:self-auto">
+                        <i class="fa-solid fa-house"></i> Dashboard
+                    </button>
+                </div>
+
+                <div class="card-futuristic p-6 bg-purple-50/30 border-purple-200">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-2 border-b border-purple-200">
+                        <div>
+                            <h3 class="font-extrabold text-purple-950 text-base flex items-center gap-2">
+                                <i class="fa-solid fa-users-rectangle text-purple-600"></i> Penilaian Kelompok Gudep (Putra & Putri Menggunakan Nomor & GUDEP Sama)
+                            </h3>
+                            <p class="text-xs text-gray-500">Nilai kelompok merupakan penggabungan regu Putra dan Putri dari GUDEP yang sama</p>
+                        </div>
+                        <button onclick="saveAnsambleScores()" class="admin-only px-4 py-2 bg-purple-700 hover:bg-purple-800 text-white font-bold rounded-xl text-xs shadow flex items-center gap-1.5 transition-all self-start sm:self-auto">
+                            <i class="fa-solid fa-floppy-disk"></i> Simpan Data Nilai Ansamble
+                        </button>
+                    </div>
+
+                    <div class="overflow-x-auto rounded-xl border border-purple-200 bg-white">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="bg-purple-900 text-white text-[11px] uppercase tracking-wider">
+                                    <th class="p-3 text-center">No. Gudep</th>
+                                    <th class="p-3">Nama GUDEP (Kelompok)</th>
+                                    <th class="p-3 text-center w-24">Kesesuaian Tema</th>
+                                    <th class="p-3 text-center w-24">Aransemen Musik</th>
+                                    <th class="p-3 text-center w-24">Kualitas Vokal</th>
+                                    <th class="p-3 text-center w-24">Kostum</th>
+                                    <th class="p-3 text-center font-extrabold bg-purple-950">Total Skor</th>
+                                    <th class="p-3 text-center font-extrabold bg-purple-950">Peringkat Kelompok</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ansamble-tbody" class="divide-y divide-purple-100 text-xs font-semibold text-gray-800">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+            <div id="tab-peringkat-umum" class="tab-content space-y-6">
+                
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 card-futuristic p-5">
+                    <div>
+                        <h2 class="text-xl font-extrabold text-pramuka-900 flex items-center gap-2">
+                            <i class="fa-solid fa-trophy text-pramuka-gold text-2xl"></i> Rekapitualasi & Peringkat Umum
+                        </h2>
+                        <p class="text-xs text-gray-500 mt-1">Penentuan Juara Umum 1, 2, 3 dan Harapan 1 Jenjang SMP Kwarran Masaran</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button onclick="exportToExcel()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-file-excel"></i> Kirim / Download Spreadsheet (Excel)
+                        </button>
+                        <button onclick="window.print()" class="px-4 py-2 bg-pramuka-800 hover:bg-pramuka-900 text-white font-bold rounded-xl text-xs shadow transition-all flex items-center gap-2">
+                            <i class="fa-solid fa-print"></i> Cetak / PDF
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Juara Umum Winners Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    
+                    <!-- Juara 1 -->
+                    <div class="card-futuristic p-6 bg-gradient-to-br from-amber-500/20 via-white to-amber-100/50 border-2 border-amber-400 relative overflow-hidden badge-winner">
+                        <div class="absolute -right-3 -top-3 w-16 h-16 bg-amber-400/30 rounded-full blur-xl pointer-events-none"></div>
+                        <div class="flex items-center justify-between">
+                            <span class="px-3 py-1 bg-amber-500 text-white font-black text-[10px] uppercase tracking-wider rounded-full shadow-sm">
+                                JUARA UMUM 1
+                            </span>
+                            <i class="fa-solid fa-trophy text-amber-500 text-3xl"></i>
+                        </div>
+                        <div id="juara-1-gudep" class="text-base font-black text-amber-950 mt-4 line-clamp-1">
+                            Belum Ada Data
+                        </div>
+                        <div class="mt-2 text-xs font-semibold text-amber-800 flex justify-between">
+                            <span>Total Skor Akumulasi:</span>
+                            <strong id="juara-1-skor" class="text-amber-950">0</strong>
+                        </div>
+                    </div>
+
+                    <!-- Juara 2 -->
+                    <div class="card-futuristic p-6 bg-gradient-to-br from-slate-400/20 via-white to-slate-100/50 border-2 border-slate-300 relative overflow-hidden">
+                        <div class="flex items-center justify-between">
+                            <span class="px-3 py-1 bg-slate-600 text-white font-black text-[10px] uppercase tracking-wider rounded-full shadow-sm">
+                                JUARA UMUM 2
+                            </span>
+                            <i class="fa-solid fa-trophy text-slate-400 text-3xl"></i>
+                        </div>
+                        <div id="juara-2-gudep" class="text-base font-black text-slate-900 mt-4 line-clamp-1">
+                            Belum Ada Data
+                        </div>
+                        <div class="mt-2 text-xs font-semibold text-slate-800 flex justify-between">
+                            <span>Total Skor Akumulasi:</span>
+                            <strong id="juara-2-skor" class="text-slate-950">0</strong>
+                        </div>
+                    </div>
+
+                    <!-- Juara 3 -->
+                    <div class="card-futuristic p-6 bg-gradient-to-br from-amber-700/15 via-white to-amber-50/50 border-2 border-amber-600/40 relative overflow-hidden">
+                        <div class="flex items-center justify-between">
+                            <span class="px-3 py-1 bg-amber-800 text-white font-black text-[10px] uppercase tracking-wider rounded-full shadow-sm">
+                                JUARA UMUM 3
+                            </span>
+                            <i class="fa-solid fa-trophy text-amber-800 text-3xl"></i>
+                        </div>
+                        <div id="juara-3-gudep" class="text-base font-black text-amber-950 mt-4 line-clamp-1">
+                            Belum Ada Data
+                        </div>
+                        <div class="mt-2 text-xs font-semibold text-amber-900 flex justify-between">
+                            <span>Total Skor Akumulasi:</span>
+                            <strong id="juara-3-skor" class="text-amber-950">0</strong>
+                        </div>
+                    </div>
+
+                    <!-- Juara Harapan 1 -->
+                    <div class="card-futuristic p-6 bg-gradient-to-br from-indigo-500/15 via-white to-indigo-50/50 border-2 border-indigo-300 relative overflow-hidden">
+                        <div class="flex items-center justify-between">
+                            <span class="px-3 py-1 bg-indigo-600 text-white font-black text-[10px] uppercase tracking-wider rounded-full shadow-sm">
+                                JUARA HARAPAN 1
+                            </span>
+                            <i class="fa-solid fa-medal text-indigo-600 text-3xl"></i>
+                        </div>
+                        <div id="juara-h1-gudep" class="text-base font-black text-indigo-950 mt-4 line-clamp-1">
+                            Belum Ada Data
+                        </div>
+                        <div class="mt-2 text-xs font-semibold text-indigo-900 flex justify-between">
+                            <span>Total Skor Akumulasi:</span>
+                            <strong id="juara-h1-skor" class="text-indigo-950">0</strong>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Matrix Rincian Nilai Semua Lomba -->
+                <div class="card-futuristic p-6">
+                    <div class="mb-4 pb-2 border-b border-pramuka-200">
+                        <h3 class="font-bold text-pramuka-900 text-base flex items-center gap-2">
+                            <i class="fa-solid fa-table text-pramuka-600"></i> Matrix Rincian Seluruh Nilai Mata Lomba
+                        </h3>
+                        <p class="text-xs text-gray-500">Akumulasi total nilai per GUDEP dari Pioneering (Pa & Pi), Hasta Karya (Pa & Pi), dan Ansamble Tradisional</p>
+                    </div>
+
+                    <div class="overflow-x-auto rounded-xl border border-pramuka-200 bg-white">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead>
+                                <tr class="bg-pramuka-900 text-white text-[11px] uppercase tracking-wider">
+                                    <th class="p-3 text-center">Peringkat</th>
+                                    <th class="p-3">Nama GUDEP</th>
+                                    <th class="p-3 text-center bg-amber-950/40 comp-name-pioneering">Pioneering (Pa)</th>
+                                    <th class="p-3 text-center bg-amber-950/40 comp-name-pioneering">Pioneering (Pi)</th>
+                                    <th class="p-3 text-center bg-emerald-950/40 comp-name-hastakarya">Hasta Karya (Pa)</th>
+                                    <th class="p-3 text-center bg-emerald-950/40 comp-name-hastakarya">Hasta Karya (Pi)</th>
+                                    <th class="p-3 text-center bg-purple-950/40 comp-name-ansamble">Ansamble</th>
+                                    <th class="p-3 text-center bg-pramuka-dark font-extrabold text-pramuka-gold text-xs">TOTAL SKOR</th>
+                                </tr>
+                            </thead>
+                            <tbody id="peringkat-umum-tbody" class="divide-y divide-pramuka-100 font-semibold text-pramuka-900">
+                                <!-- Dynamic rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+            </div>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-pramuka-dark text-pramuka-tan border-t border-pramuka-800 py-4 mt-8 no-print">
+            <div class="max-w-7xl mx-auto px-4 text-center text-xs flex flex-col sm:flex-row items-center justify-between gap-2">
+                <div>
+                    <strong>APLIKASI REKAP NILAI LOMBA PRAMUKA</strong> &copy; 2026 KWARRAN 02 MASARAN
+                </div>
+                <div class="text-pramuka-gold font-semibold">
+                    Dikembangkan oleh Hendra Budiarsa, S.Pd
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <script>
+        // Default App State Structure
+        const DEFAULT_APP_STATE = {
+            competitions: {
+                c1: "Pioneering",
+                c2: "Hasta Karya",
+                c3: "Ansamble Tradisional"
+            },
+            peserta: [
+                { id: "p1", nomor: "01", gudep: "SMP Negeri 1 Masaran", jk: "Putra" },
+                { id: "p2", nomor: "01", gudep: "SMP Negeri 1 Masaran", jk: "Putri" },
+                { id: "p3", nomor: "02", gudep: "SMP Negeri 2 Masaran", jk: "Putra" },
+                { id: "p4", nomor: "02", gudep: "SMP Negeri 2 Masaran", jk: "Putri" },
+                { id: "p5", nomor: "03", gudep: "SMP PGRI Masaran", jk: "Putra" },
+                { id: "p6", nomor: "03", gudep: "SMP PGRI Masaran", jk: "Putri" }
+            ],
+            // Scores keyed by participant ID or Gudep Number
+            scores: {
+                pioneering: {
+                    "p1": { k1: 85, k2: 88, k3: 90, k4: 87 },
+                    "p2": { k1: 82, k2: 85, k3: 88, k4: 84 },
+                    "p3": { k1: 78, k2: 80, k3: 82, k4: 80 },
+                    "p4": { k1: 90, k2: 92, k3: 89, k4: 91 },
+                    "p5": { k1: 75, k2: 78, k3: 76, k4: 77 },
+                    "p6": { k1: 80, k2: 82, k3: 85, k4: 81 }
+                },
+                hastakarya: {
+                    "p1": { k1: 88, k2: 90, k3: 85 },
+                    "p2": { k1: 85, k2: 87, k3: 89 },
+                    "p3": { k1: 80, k2: 82, k3: 84 },
+                    "p4": { k1: 91, k2: 90, k3: 92 },
+                    "p5": { k1: 76, k2: 75, k3: 78 },
+                    "p6": { k1: 82, k2: 84, k3: 80 }
+                },
+                ansamble: {
+                    // Keyed by Gudep Number e.g. "01", "02", "03"
+                    "01": { k1: 90, k2: 88, k3: 92, k4: 90 },
+                    "02": { k1: 85, k2: 84, k3: 86, k4: 88 },
+                    "03": { k1: 80, k2: 79, k3: 82, k4: 80 }
+                }
+            }
+        };
+
+        let appState = JSON.parse(localStorage.getItem('pramuka_rekap_data')) || DEFAULT_APP_STATE;
+        let currentUserRole = null; // 'admin' or 'gudep'
+
+        // Save State to Local Storage
+        function saveState() {
+            localStorage.setItem('pramuka_rekap_data', JSON.stringify(appState));
+        }
+
+        // Initialize Application
+        window.addEventListener('DOMContentLoaded', () => {
+            initCompetitionNames();
+            renderAllViews();
+        });
+
+        // Toast Message Notification System
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const bgColor = type === 'success' ? 'bg-emerald-800' : type === 'error' ? 'bg-red-800' : 'bg-amber-800';
+            const icon = type === 'success' ? 'fa-circle-check text-emerald-300' : type === 'error' ? 'fa-triangle-exclamation text-red-300' : 'fa-info-circle text-amber-300';
+            
+            toast.className = `pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-2xl text-white text-xs font-bold shadow-2xl ${bgColor} border border-white/20 transform translate-y-5 opacity-0 transition-all duration-300`;
+            toast.innerHTML = `<i class="fa-solid ${icon} text-lg"></i> <span>${message}</span>`;
+            
+            container.appendChild(toast);
+            
+            requestAnimationFrame(() => {
+                toast.classList.remove('translate-y-5', 'opacity-0');
+            });
+
+            setTimeout(() => {
+                toast.classList.add('opacity-0', '-translate-y-2');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // ADMIN LOGIN HANDLER
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const kwarranInput = document.getElementById('admin-kwarran').value.trim();
+            const passwordInput = document.getElementById('admin-password').value.trim();
+
+            // Strict Validation: KWARRAN MASARAN & 565656
+            const isKwarranValid = kwarranInput.toUpperCase() === "KWARRAN MASARAN" || kwarranInput.toUpperCase() === "KWARRAN 02 MASARAN";
+            const isPasswordValid = passwordInput === "565656";
+
+            if (isKwarranValid && isPasswordValid) {
+                currentUserRole = 'admin';
+                loginSuccess("Admin Kwarran");
+            } else {
+                showToast("Nama Kwarran atau Password Admin Salah!", "error");
+            }
+        }
+
+        // GUDEP / READ-ONLY LOGIN HANDLER
+        function handleGudepLogin(e) {
+            e.preventDefault();
+            const gudepKey = document.getElementById('gudep-access-key').value.trim();
+            
+            if (gudepKey.length > 0) {
+                currentUserRole = 'gudep';
+                loginSuccess(`Pengunjung (${gudepKey})`);
+            } else {
+                showToast("Silakan isi nama Gudep Anda!", "warning");
+            }
+        }
+
+        function loginSuccess(roleName) {
+            document.getElementById('login-page').classList.add('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                document.getElementById('login-page').classList.add('hidden');
+                document.getElementById('main-app').classList.remove('hidden');
+                
+                // Update UI based on Role
+                document.getElementById('role-text').innerText = currentUserRole === 'admin' ? 'Admin Kwarran' : 'Mode Lihat (Gudep)';
+                
+                // Toggle Admin-only editable elements
+                const adminElements = document.querySelectorAll('.admin-only');
+                adminElements.forEach(el => {
+                    if (currentUserRole !== 'admin') {
+                        el.style.display = 'none';
+                    } else {
+                        el.style.display = '';
+                    }
+                });
+
+                showToast(`Selamat datang! Anda masuk sebagai ${roleName}`);
+            }, 300);
+        }
+
+        function logout() {
+            currentUserRole = null;
+            document.getElementById('main-app').classList.add('hidden');
+            document.getElementById('login-page').classList.remove('hidden', 'opacity-0', 'pointer-events-none');
+            document.getElementById('admin-password').value = '';
+            showToast("Anda telah keluar dari aplikasi.", "info");
+        }
+
+        function toggleSidebar() {
+            const sidebar = document.getElementById('mobile-sidebar');
+            sidebar.classList.toggle('hidden');
+        }
+
+        // Tab Switcher with MORPH Animation
+        function switchTab(tabId) {
+            const allTabs = document.querySelectorAll('.tab-content');
+            const allNavBtns = document.querySelectorAll('.nav-tab');
+
+            allTabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+
+            allNavBtns.forEach(btn => {
+                btn.classList.remove('bg-white/20', 'text-white', 'shadow-inner');
+                btn.classList.add('text-pramuka-tan');
+            });
+
+            const targetTab = document.getElementById(`tab-${tabId}`);
+            const targetNavBtn = document.getElementById(`nav-${tabId}`);
+
+            if (targetTab) {
+                targetTab.classList.add('active');
+            }
+
+            if (targetNavBtn) {
+                targetNavBtn.classList.add('bg-white/20', 'text-white', 'shadow-inner');
+                targetNavBtn.classList.remove('text-pramuka-tan');
+            }
+
+            // Re-render data for tab
+            renderAllViews();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function initCompetitionNames() {
+            document.getElementById('edit-comp-1').value = appState.competitions.c1;
+            document.getElementById('edit-comp-2').value = appState.competitions.c2;
+            document.getElementById('edit-comp-3').value = appState.competitions.c3;
+            updateCompetitionDOMNames();
+        }
+
+        function saveCompetitionNames(e) {
+            e.preventDefault();
+            if (currentUserRole !== 'admin') return;
+
+            appState.competitions.c1 = document.getElementById('edit-comp-1').value.trim();
+            appState.competitions.c2 = document.getElementById('edit-comp-2').value.trim();
+            appState.competitions.c3 = document.getElementById('edit-comp-3').value.trim();
+
+            saveState();
+            updateCompetitionDOMNames();
+            showToast("Nama mata lomba berhasil diperbarui!");
+        }
+
+        function updateCompetitionDOMNames() {
+            document.querySelectorAll('.comp-name-pioneering').forEach(el => el.innerText = appState.competitions.c1);
+            document.querySelectorAll('.comp-name-hastakarya').forEach(el => el.innerText = appState.competitions.c2);
+            document.querySelectorAll('.comp-name-ansamble').forEach(el => el.innerText = appState.competitions.c3);
+        }
+
+        // Save Participant (Tambah/Edit)
+        function savePeserta(e) {
+            e.preventDefault();
+            if (currentUserRole !== 'admin') {
+                showToast("Anda dalam mode lihat-saja!", "warning");
+                return;
+            }
+
+            const editId = document.getElementById('peserta-edit-id').value;
+            const nomor = document.getElementById('peserta-nomor').value.toString().padStart(2, '0');
+            const gudep = document.getElementById('peserta-gudep').value.trim();
+            const jk = document.getElementById('peserta-jk').value;
+
+            if (editId) {
+                // Update
+                const index = appState.peserta.findIndex(p => p.id === editId);
+                if (index !== -1) {
+                    appState.peserta[index].nomor = nomor;
+                    appState.peserta[index].gudep = gudep;
+                    appState.peserta[index].jk = jk;
+                    showToast("Data peserta berhasil diperbarui!");
+                }
+            } else {
+                // Create New
+                const newId = 'p_' + Date.now();
+                appState.peserta.push({
+                    id: newId,
+                    nomor: nomor,
+                    gudep: gudep,
+                    jk: jk
+                });
+                showToast("Peserta baru berhasil ditambahkan!");
+            }
+
+            saveState();
+            resetPesertaForm();
+            renderAllViews();
+        }
+
+        function editPeserta(id) {
+            if (currentUserRole !== 'admin') return;
+            const p = appState.peserta.find(item => item.id === id);
+            if (!p) return;
+
+            document.getElementById('peserta-edit-id').value = p.id;
+            document.getElementById('peserta-nomor').value = parseInt(p.nomor, 10);
+            document.getElementById('peserta-gudep').value = p.gudep;
+            document.getElementById('peserta-jk').value = p.jk;
+
+            document.getElementById('peserta-form-title').innerText = 'Edit Data Peserta';
+            document.getElementById('peserta-btn-text').innerText = 'Update Data Peserta';
+            document.getElementById('peserta-btn-cancel').classList.remove('hidden');
+        }
+
+        function deletePeserta(id) {
+            if (currentUserRole !== 'admin') return;
+            if (confirm("Apakah Anda yakin ingin menghapus peserta ini? Seluruh data nilai peserta ini akan ikut terhapus.")) {
+                appState.peserta = appState.peserta.filter(p => p.id !== id);
+                delete appState.scores.pioneering[id];
+                delete appState.scores.hastakarya[id];
+                
+                saveState();
+                renderAllViews();
+                showToast("Data peserta telah dihapus.", "info");
+            }
+        }
+
+        function resetPesertaForm() {
+            document.getElementById('peserta-form').reset();
+            document.getElementById('peserta-edit-id').value = '';
+            document.getElementById('peserta-form-title').innerText = 'Tambah Data Peserta';
+            document.getElementById('peserta-btn-text').innerText = 'Simpan Data Peserta';
+            document.getElementById('peserta-btn-cancel').classList.add('hidden');
+        }
+
+        function renderPesertaTable() {
+            const tbody = document.getElementById('peserta-table-body');
+            const searchKey = document.getElementById('search-peserta').value.toLowerCase();
+
+            // Sort Peserta by Nomor Urut
+            let list = [...appState.peserta].sort((a, b) => parseInt(a.nomor) - parseInt(b.nomor));
+
+            if (searchKey) {
+                list = list.filter(p => p.gudep.toLowerCase().includes(searchKey) || p.nomor.includes(searchKey));
+            }
+
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center p-6 text-gray-400">Belum ada data peserta yang tersimpan.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map(p => `
+                <tr class="hover:bg-pramuka-50/80 transition-colors">
+                    <td class="p-3 text-center font-bold text-pramuka-800 bg-pramuka-100/40 w-20">
+                        No. ${p.nomor}
+                    </td>
+                    <td class="p-3 font-bold text-pramuka-900">
+                        ${p.gudep}
+                    </td>
+                    <td class="p-3 text-center">
+                        <span class="px-2.5 py-1 rounded-full text-[11px] font-extrabold ${p.jk === 'Putra' ? 'bg-blue-100 text-blue-800' : 'bg-rose-100 text-rose-800'}">
+                            <i class="fa-solid ${p.jk === 'Putra' ? 'fa-mars' : 'fa-venus'} mr-1"></i> ${p.jk}
+                        </span>
+                    </td>
+                    <td class="p-3 text-center admin-only">
+                        <div class="flex items-center justify-center gap-1.5">
+                            <button onclick="editPeserta('${p.id}')" class="p-1.5 bg-amber-500 hover:bg-amber-600 text-white rounded-lg shadow transition-all" title="Edit">
+                                <i class="fa-solid fa-pen-to-square"></i>
+                            </button>
+                            <button onclick="deletePeserta('${p.id}')" class="p-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg shadow transition-all" title="Hapus">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        
+        // Helper: Calculate total scores and ranks
+        function calculatePioneering(jk) {
+            const list = appState.peserta
+                .filter(p => p.jk === jk)
+                .sort((a, b) => parseInt(a.nomor) - parseInt(b.nomor));
+
+            const evaluated = list.map(p => {
+                const s = appState.scores.pioneering[p.id] || { k1: 0, k2: 0, k3: 0, k4: 0 };
+                const total = (Number(s.k1) || 0) + (Number(s.k2) || 0) + (Number(s.k3) || 0) + (Number(s.k4) || 0);
+                return { ...p, scoreObj: s, total: total };
+            });
+
+            // Sort for ranking (higher total score gets rank 1)
+            const sorted = [...evaluated].sort((a, b) => b.total - a.total);
+            evaluated.forEach(item => {
+                const rank = sorted.findIndex(s => s.id === item.id) + 1;
+                item.rank = item.total > 0 ? rank : '-';
+            });
+
+            return evaluated;
+        }
+
+        function calculateHastaKarya(jk) {
+            const list = appState.peserta
+                .filter(p => p.jk === jk)
+                .sort((a, b) => parseInt(a.nomor) - parseInt(b.nomor));
+
+            const evaluated = list.map(p => {
+                const s = appState.scores.hastakarya[p.id] || { k1: 0, k2: 0, k3: 0 };
+                const total = (Number(s.k1) || 0) + (Number(s.k2) || 0) + (Number(s.k3) || 0);
+                return { ...p, scoreObj: s, total: total };
+            });
+
+            const sorted = [...evaluated].sort((a, b) => b.total - a.total);
+            evaluated.forEach(item => {
+                const rank = sorted.findIndex(s => s.id === item.id) + 1;
+                item.rank = item.total > 0 ? rank : '-';
+            });
+
+            return evaluated;
+        }
+
+        function calculateAnsambleGroup() {
+            // Group participants by Nomor Gudep
+            const gudepMap = {};
+            appState.peserta.forEach(p => {
+                if (!gudepMap[p.nomor]) {
+                    gudepMap[p.nomor] = {
+                        nomor: p.nomor,
+                        gudep: p.gudep
+                    };
+                }
+            });
+
+            const list = Object.values(gudepMap).sort((a, b) => parseInt(a.nomor) - parseInt(b.nomor));
+
+            const evaluated = list.map(item => {
+                const s = appState.scores.ansamble[item.nomor] || { k1: 0, k2: 0, k3: 0, k4: 0 };
+                const total = (Number(s.k1) || 0) + (Number(s.k2) || 0) + (Number(s.k3) || 0) + (Number(s.k4) || 0);
+                return { ...item, scoreObj: s, total: total };
+            });
+
+            const sorted = [...evaluated].sort((a, b) => b.total - a.total);
+            evaluated.forEach(item => {
+                const rank = sorted.findIndex(s => s.nomor === item.nomor) + 1;
+                item.rank = item.total > 0 ? rank : '-';
+            });
+
+            return evaluated;
+        }
+
+        // Render Pioneering Tables
+        function renderPioneeringTables() {
+            ['Putra', 'Putri'].forEach(jk => {
+                const tbody = document.getElementById(`pioneering-${jk.toLowerCase()}-tbody`);
+                const data = calculatePioneering(jk);
+
+                if (data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="8" class="text-center p-4 text-gray-400">Belum ada peserta ${jk}.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = data.map(item => `
+                    <tr>
+                        <td class="p-3 text-center font-bold">No. ${item.nomor}</td>
+                        <td class="p-3 font-bold text-gray-900">${item.gudep}</td>
+                        <td class="p-2 text-center">
+                            <input type="number" min="0" max="100" data-pid="${item.id}" data-key="k1" value="${item.scoreObj.k1 || ''}" 
+                                class="pio-in-${jk.toLowerCase()} w-16 text-center py-1 rounded border border-gray-300 focus:ring-2 focus:ring-amber-500 font-bold" ${currentUserRole !== 'admin' ? 'disabled' : ''}>
+                        </td>
+                        <td class="p-2 text-center">
+                            <input type="number" min="0" max="100" data-pid="${item.id}" data-key="k2" value="${item.scoreObj.k2 || ''}" 
+                                class="pio-in-${jk.toLowerCase()} w-16 text-center py-1 rounded border border-gray-300 focus:ring-2 focus:ring-amber-500 font-bold" ${currentUserRole !== 'admin' ? 'disabled' : ''}>
+                        </td>
+                        <td class="p-2 text-center">
+                            <input type="number" min="0" max="100" data-pid="${item.id}" data-key="k3" value="${item.scoreObj.k3 || ''}" 
+                                class="pio-in-${jk.toLowerCase()} w-16 text-center py-1 rounded border border-gray-300 focus:ring-2 focus:ring-amber-500 font-bold" ${currentUserRole !== 'admin' ? 'disabled' : ''}>
+                        </td>
+                        <td class="p-2 text-center">
+                            <input type="number" min="0" max="100" data-pid="${item.id}" data-key="k4" value="${item.scoreObj.k4 || ''}" 
+                                class="pio-in-${jk.toLowerCase()} w-16 text-center py-1 rounded border border-gray-300 focus:ring-2 focus:ring-amber-500 font-bold" ${currentUserRole !== 'admin' ? 'disabled' : ''}>
+                        </td>
+                        <td class="p-3 text-center font-black text-sm bg-gray-50">${item.total}</td>
+                        <td class="p-3 text-center font-black text-sm bg-gray-50">
+                            ${item.rank === 1 ? '<span class="px-2 py-0.5 rounded bg-amber-400 text-amber-950 shadow-sm">Rank 1</span>' : item.rank === 2 ? '<span class="px-2 py-0.5 rounded bg-slate-300 text-slate-900">Rank 2</span>' : item.rank === 3 ? '<span class="px-2 py-0.5 rounded bg-amber-700 text-white">Rank 3</span>' : item.rank}
+                        </td>
+                    </tr>
+                `).join('');
+            });
+        }
+
+        function savePioneeringScores(jk) {
+            if (currentUserRole !== 'admin') return;
+            const inputs = document.querySelectorAll(`.pio-in-${jk.toLowerCase()}`);
+            inputs.forEach(input => {
+                const pid = input.getAttribute('data-pid');
+                const key = input.getAttribute('data-key');
+                const val = parseFloat(input.value) || 0;
+
+                if (!appState.scores.pioneering[pid]) {
+                    appState.scores.pioneering[pid] = { k1: 0, k2: 0, k3: 0, k4: 0 };
+                }
+                appState.scores.pioneering[pid][key] = val;
+            });
+
+            saveState();
+            renderAllViews();
+            showToast(`Nilai Pioneering ${jk} berhasil disimpan!`);
+        }
+
+        // Render Hasta Karya Tables
+        function renderHastaKaryaTables() {
+            ['Putra', 'Putri'].forEach(jk => {
+                const tbody = document.getElementById(`hastakarya-${jk.toLowerCase()}-tbody`);
+                const data = calculateHastaKarya(jk);
+
+                if (data.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="7" class="text-center p-4 text-gray-400">Belum ada peserta ${jk}.</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = data.map(item => `
+                    <tr>
+                        <td class="p-3 text-center font-bold">No. ${item.nomor}</td>
+                        <td class="p-3 font-bold text-gray-900">${item.gudep}</td>
+                        <td class="p-2 text-center">
+                            <input type="number" min="0" max="100" data-pid="${item.id}" data-key="k1" value="${item.scoreObj.k1 || ''}" 
+                                class="hk-in-${jk.toLowerCase()} w-20 text-center py-1 rounded border border-gray-300 focus:ring-2 focus:ring-emerald-500 font-bold" ${currentUserRole !== 'admin' ? 'disabled' : ''}>
+                        </td>
+                        <td class="p-2 text-center">
+                            <input type="number" min="0" max="100" data-pid="${item.id}" data-key="k2" value="${item.scoreObj.k2 || ''}" 
+                                class="hk-in-${jk.toLowerCase()} w-20 text-center py-1 rounded border border-gray-300 focus:ring-2 focus:ring-emerald-500 font-bold" ${currentUserRole !== 'admin' ? 'disabled' : ''}>
+                        </td>
+                        <td class="p-2 text-center">
+                            <input type="number" min="0" max="100" data-pid="${item.id}" data-key="k3" value="${item.scoreObj.k3 || ''}" 
+                                class="hk-in-${jk.toLowerCase()} w-20 text-center py-1 rounded border border-gray-300 focus:ring-2 focus:ring-emerald-500 font-bold" ${currentUserRole !== 'admin' ? 'disabled' : ''}>
+                        </td>
+                        <td class="p-3 text-center font-black text-sm bg-gray-50">${item.total}</td>
+                        <td class="p-3 text-center font-black text-sm bg-gray-50">
+                            ${item.rank === 1 ? '<span class="px-2 py-0.5 rounded bg-amber-400 text-amber-950 shadow-sm">Rank 1</span>' : item.rank === 2 ? '<span class="px-2 py-0.5 rounded bg-slate-300 text-slate-900">Rank 2</span>' : item.rank === 3 ? '<span class="px-2 py-0.5 rounded bg-amber-700 text-white">Rank 3</span>' : item.rank}
+                        </td>
+                    </tr>
+                `).join('');
+            });
+        }
+
+        function saveHastaKaryaScores(jk) {
+            if (currentUserRole !== 'admin') return;
+            const inputs = document.querySelectorAll(`.hk-in-${jk.toLowerCase()}`);
+            inputs.forEach(input => {
+                const pid = input.getAttribute('data-pid');
+                const key = input.getAttribute('data-key');
+                const val = parseFloat(input.value) || 0;
+
+                if (!appState.scores.hastakarya[pid]) {
+                    appState.scores.hastakarya[pid] = { k1: 0, k2: 0, k3: 0 };
+                }
+                appState.scores.hastakarya[pid][key] = val;
+            });
+
+            saveState();
+            renderAllViews();
+            showToast(`Nilai Hasta Karya ${jk} berhasil disimpan!`);
+        }
+
+        // Render Ansamble Table
+        function renderAnsambleTable() {
+            const tbody = document.getElementById('ansamble-tbody');
+            const data = calculateAnsambleGroup();
+
+            if (data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center p-4 text-gray-400">Belum ada kelompok Gudep terdaftar.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = data.map(item => `
+                <tr>
+                    <td class="p-3 text-center font-bold text-purple-900 bg-purple-100/30">No. ${item.nomor}</td>
+                    <td class="p-3 font-bold text-gray-900">${item.gudep}</td>
+                    <td class="p-2 text-center">
+                        <input type="number" min="0" max="100" data-nomor="${item.nomor}" data-key="k1" value="${item.scoreObj.k1 || ''}" 
+                            class="ans-in w-16 text-center py-1 rounded border border-purple-300 focus:ring-2 focus:ring-purple-600 font-bold" ${currentUserRole !== 'admin' ? 'disabled' : ''}>
+                    </td>
+                    <td class="p-2 text-center">
+                        <input type="number" min="0" max="100" data-nomor="${item.nomor}" data-key="k2" value="${item.scoreObj.k2 || ''}" 
+                            class="ans-in w-16 text-center py-1 rounded border border-purple-300 focus:ring-2 focus:ring-purple-600 font-bold" ${currentUserRole !== 'admin' ? 'disabled' : ''}>
+                    </td>
+                    <td class="p-2 text-center">
+                        <input type="number" min="0" max="100" data-nomor="${item.nomor}" data-key="k3" value="${item.scoreObj.k3 || ''}" 
+                            class="ans-in w-16 text-center py-1 rounded border border-purple-300 focus:ring-2 focus:ring-purple-600 font-bold" ${currentUserRole !== 'admin' ? 'disabled' : ''}>
+                    </td>
+                    <td class="p-2 text-center">
+                        <input type="number" min="0" max="100" data-nomor="${item.nomor}" data-key="k4" value="${item.scoreObj.k4 || ''}" 
+                            class="ans-in w-16 text-center py-1 rounded border border-purple-300 focus:ring-2 focus:ring-purple-600 font-bold" ${currentUserRole !== 'admin' ? 'disabled' : ''}>
+                    </td>
+                    <td class="p-3 text-center font-black text-sm bg-purple-50/50">${item.total}</td>
+                    <td class="p-3 text-center font-black text-sm bg-purple-50/50">
+                        ${item.rank === 1 ? '<span class="px-2 py-0.5 rounded bg-amber-400 text-amber-950 shadow-sm">Rank 1</span>' : item.rank === 2 ? '<span class="px-2 py-0.5 rounded bg-slate-300 text-slate-900">Rank 2</span>' : item.rank === 3 ? '<span class="px-2 py-0.5 rounded bg-amber-700 text-white">Rank 3</span>' : item.rank}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function saveAnsambleScores() {
+            if (currentUserRole !== 'admin') return;
+            const inputs = document.querySelectorAll('.ans-in');
+            inputs.forEach(input => {
+                const nomor = input.getAttribute('data-nomor');
+                const key = input.getAttribute('data-key');
+                const val = parseFloat(input.value) || 0;
+
+                if (!appState.scores.ansamble[nomor]) {
+                    appState.scores.ansamble[nomor] = { k1: 0, k2: 0, k3: 0, k4: 0 };
+                }
+                appState.scores.ansamble[nomor][key] = val;
+            });
+
+            saveState();
+            renderAllViews();
+            showToast('Nilai Ansamble Tradisional Kelompok berhasil disimpan!');
+        }
+
+        
+        function calculateOverallLeaderboard() {
+            // Group scores by Gudep Name
+            const gudepScores = {};
+
+            // Pre-calculate
+            const pioPa = calculatePioneering('Putra');
+            const pioPi = calculatePioneering('Putri');
+            const hkPa = calculateHastaKarya('Putra');
+            const hkPi = calculateHastaKarya('Putri');
+            const ansGroup = calculateAnsambleGroup();
+
+            appState.peserta.forEach(p => {
+                if (!gudepScores[p.gudep]) {
+                    gudepScores[p.gudep] = {
+                        gudep: p.gudep,
+                        nomor: p.nomor,
+                        pioPaScore: 0,
+                        pioPiScore: 0,
+                        hkPaScore: 0,
+                        hkPiScore: 0,
+                        ansScore: 0,
+                        totalOverall: 0
+                    };
+                }
+            });
+
+            // Map Pioneering
+            pioPa.forEach(item => {
+                if (gudepScores[item.gudep]) gudepScores[item.gudep].pioPaScore = item.total;
+            });
+            pioPi.forEach(item => {
+                if (gudepScores[item.gudep]) gudepScores[item.gudep].pioPiScore = item.total;
+            });
+
+            // Map Hasta Karya
+            hkPa.forEach(item => {
+                if (gudepScores[item.gudep]) gudepScores[item.gudep].hkPaScore = item.total;
+            });
+            hkPi.forEach(item => {
+                if (gudepScores[item.gudep]) gudepScores[item.gudep].hkPiScore = item.total;
+            });
+
+            // Map Ansamble (grouped by Gudep Name)
+            ansGroup.forEach(item => {
+                if (gudepScores[item.gudep]) gudepScores[item.gudep].ansScore = item.total;
+            });
+
+            // Calculate total overall score
+            const list = Object.values(gudepScores).map(item => {
+                item.totalOverall = item.pioPaScore + item.pioPiScore + item.hkPaScore + item.hkPiScore + item.ansScore;
+                return item;
+            });
+
+            // Sort descending by total score
+            list.sort((a, b) => b.totalOverall - a.totalOverall);
+
+            // Assign overall rank
+            list.forEach((item, idx) => {
+                item.overallRank = item.totalOverall > 0 ? idx + 1 : '-';
+            });
+
+            return list;
+        }
+
+        function renderOverallPeringkat() {
+            const list = calculateOverallLeaderboard();
+            const tbody = document.getElementById('peringkat-umum-tbody');
+
+            if (list.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="text-center p-6 text-gray-400">Belum ada data untuk kalkulasi peringkat umum.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = list.map(item => `
+                <tr class="hover:bg-pramuka-50 transition-colors">
+                    <td class="p-3 text-center font-black text-sm">
+                        ${item.overallRank === 1 ? '<span class="px-2.5 py-1 rounded-full bg-amber-400 text-amber-950 font-black shadow-sm">JUARA 1</span>' :
+                          item.overallRank === 2 ? '<span class="px-2.5 py-1 rounded-full bg-slate-300 text-slate-900 font-black">JUARA 2</span>' :
+                          item.overallRank === 3 ? '<span class="px-2.5 py-1 rounded-full bg-amber-800 text-white font-black">JUARA 3</span>' :
+                          item.overallRank === 4 ? '<span class="px-2.5 py-1 rounded-full bg-indigo-200 text-indigo-900 font-black">HARAPAN 1</span>' : item.overallRank}
+                    </td>
+                    <td class="p-3 font-extrabold text-pramuka-900 text-sm">
+                        ${item.gudep} <span class="text-xs font-normal text-gray-500">(No. ${item.nomor})</span>
+                    </td>
+                    <td class="p-3 text-center bg-amber-50/50">${item.pioPaScore}</td>
+                    <td class="p-3 text-center bg-amber-50/50">${item.pioPiScore}</td>
+                    <td class="p-3 text-center bg-emerald-50/50">${item.hkPaScore}</td>
+                    <td class="p-3 text-center bg-emerald-50/50">${item.hkPiScore}</td>
+                    <td class="p-3 text-center bg-purple-50/50">${item.ansScore}</td>
+                    <td class="p-3 text-center font-black text-base bg-pramuka-100 text-pramuka-900">${item.totalOverall}</td>
+                </tr>
+            `).join('');
+
+            // Update Winners Cards
+            const j1 = list[0] && list[0].totalOverall > 0 ? list[0] : null;
+            const j2 = list[1] && list[1].totalOverall > 0 ? list[1] : null;
+            const j3 = list[2] && list[2].totalOverall > 0 ? list[2] : null;
+            const jh1 = list[3] && list[3].totalOverall > 0 ? list[3] : null;
+
+            document.getElementById('juara-1-gudep').innerText = j1 ? j1.gudep : 'Belum Ada Data';
+            document.getElementById('juara-1-skor').innerText = j1 ? j1.totalOverall : 0;
+
+            document.getElementById('juara-2-gudep').innerText = j2 ? j2.gudep : 'Belum Ada Data';
+            document.getElementById('juara-2-skor').innerText = j2 ? j2.totalOverall : 0;
+
+            document.getElementById('juara-3-gudep').innerText = j3 ? j3.gudep : 'Belum Ada Data';
+            document.getElementById('juara-3-skor').innerText = j3 ? j3.totalOverall : 0;
+
+            document.getElementById('juara-h1-gudep').innerText = jh1 ? jh1.gudep : 'Belum Ada Data';
+            document.getElementById('juara-h1-skor').innerText = jh1 ? jh1.totalOverall : 0;
+
+            // Update Dashboard Preview Cards
+            renderDashboardPreview(list);
+        }
+
+        function renderDashboardPreview(list) {
+            const container = document.getElementById('dash-leaderboard-preview');
+            const top4 = list.slice(0, 4);
+
+            if (top4.length === 0 || (top4[0] && top4[0].totalOverall === 0)) {
+                container.innerHTML = `<div class="col-span-4 text-center py-4 text-gray-400 text-xs">Belum ada skor yang dimasukkan.</div>`;
+                return;
+            }
+
+            container.innerHTML = top4.map((item, idx) => `
+                <div class="p-3.5 rounded-2xl ${idx === 0 ? 'bg-amber-500/10 border-2 border-amber-400' : 'bg-gray-50 border border-gray-200'}">
+                    <div class="flex justify-between items-center text-[10px] font-black uppercase">
+                        <span class="${idx === 0 ? 'text-amber-800' : 'text-gray-500'}">
+                            ${idx === 0 ? 'Juara 1' : idx === 1 ? 'Juara 2' : idx === 2 ? 'Juara 3' : 'Harapan 1'}
+                        </span>
+                        <span class="font-bold text-gray-900">${item.totalOverall} Pts</span>
+                    </div>
+                    <div class="font-bold text-xs text-pramuka-900 mt-2 truncate">${item.gudep}</div>
+                </div>
+            `).join('');
+        }
+
+        function renderDashboardStats() {
+            const totalPeserta = appState.peserta.length;
+            const totalPutra = appState.peserta.filter(p => p.jk === 'Putra').length;
+            const totalPutri = appState.peserta.filter(p => p.jk === 'Putri').length;
+            
+            const gudepSet = new Set(appState.peserta.map(p => p.gudep));
+            
+            document.getElementById('dash-stat-peserta').innerText = totalPeserta;
+            document.getElementById('dash-stat-putra').innerText = totalPutra;
+            document.getElementById('dash-stat-putri').innerText = totalPutri;
+            document.getElementById('dash-stat-gudep').innerText = gudepSet.size;
+        }
+
+        function renderAllViews() {
+            renderDashboardStats();
+            renderPesertaTable();
+            renderPioneeringTables();
+            renderHastaKaryaTables();
+            renderAnsambleTable();
+            renderOverallPeringkat();
+        }
+
+        // EXPORT TO EXCEL / SPREADSHEET FUNCTION
+        function exportToExcel() {
+            try {
+                const overall = calculateOverallLeaderboard();
+                
+                const dataForSheet = overall.map((item, index) => ({
+                    "Peringkat": item.overallRank,
+                    "Nomor Gudep": item.nomor,
+                    "Nama GUDEP": item.gudep,
+                    [`${appState.competitions.c1} (Putra)`]: item.pioPaScore,
+                    [`${appState.competitions.c1} (Putri)`]: item.pioPiScore,
+                    [`${appState.competitions.c2} (Putra)`]: item.hkPaScore,
+                    [`${appState.competitions.c2} (Putri)`]: item.hkPiScore,
+                    [`${appState.competitions.c3}`]: item.ansScore,
+                    "TOTAL SKOR AKUMULASI": item.totalOverall
+                }));
+
+                const worksheet = XLSX.utils.json_to_sheet(dataForSheet);
+                const workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Rekap Juara Umum");
+
+                // Auto file download
+                XLSX.writeFile(workbook, `REKAP_NILAI_LOMBA_PRAMUKA_KWARRAN_MASARAN_${new Date().toISOString().slice(0,10)}.xlsx`);
+                showToast("File Spreadsheet Excel berhasil diunduh!");
+            } catch (err) {
+                console.error(err);
+                showToast("Gagal mengekspor data ke Excel", "error");
+            }
+        }
+    </script>
+</body>
+</html>
